@@ -16,7 +16,7 @@ using ESRI.ArcGIS.Geodatabase;
 
 namespace test1
 {
-    class GeoMapAO : IAddGeoData, IGeoDataOper
+    class GeoMapAO : IAddGeoData, IGeoDataOper,ILaySequAttr
     {
         //implement map control interface
         AxMapControl axMapControl1;
@@ -59,7 +59,7 @@ namespace test1
         }
 
         //define the method to load the map
-        //OpenShp
+        //load the shp file
         public void AddGeoMap()
         {
             for (int i = 0; i < strFileName.Length; i++)
@@ -159,6 +159,7 @@ namespace test1
             }
         }
 
+        //load the TIN dataset
         public void AddTINDataset()
         {
             FolderBrowserDialog openFolder = new FolderBrowserDialog();
@@ -177,6 +178,7 @@ namespace test1
             }
         }
 
+        //load the mapdocument
         public void OperateMapDoc()
         {
             OpenFileDialog OpenFileDlg = new OpenFileDialog();
@@ -267,6 +269,7 @@ namespace test1
             set { strOperType = value; }
         }
 
+
         //define a variable for the mouse press event
         IMapControlEvents2_OnMouseDownEvent e;
         public IMapControlEvents2_OnMouseDownEvent E
@@ -275,21 +278,225 @@ namespace test1
             set { e = value; }
         }
 
+
         //define how the mouse interacts with the maps
         public void OperMap()
         {
+            IMap pMap = axMapControl1.Map;
+            IActiveView pActiveView = pMap as IActiveView;
+            
+            //determine the type of map operation
+            IEnvelope pEnv;
             switch (strOperType)
             {
-                case "LKZoomIn":
+                case "LKZoomIn":  //frame enlargement
                     {
+                        pEnv = axMapControl1.TrackRectangle();
+                        pActiveView.Extent = pEnv;
+                        pActiveView.Refresh();
+                        break;
+                    }
+                case "GeoMapLkShow":  //pull-frame display
+                    {
+                        axMapControl1.MousePointer = esriControlsMousePointer.esriPointerCrosshair;
                         axMapControl1.Extent = axMapControl1.TrackRectangle();
                         axMapControl1.ActiveView.PartialRefresh(esriViewDrawPhase.esriViewGeography, null, null);
+                        break;
                     }
-                    break;
+                case "Movemap":
+                    {
+                        axMapControl1.Pan();
+                        break;
+                    }
+                case "DrawPoint":
+                    {
+                        //new point object
+                        IPoint pPt = new PointClass();
+                        pPt.PutCoords(e.mapX, e.mapY);
+
+                        //produce a marker element
+                        IMarkerElement pMarkerElement = new MarkerElementClass();
+
+                        //produce a symbol that modifies the Marker element
+                        ISimpleMarkerSymbol pMarkerSymbol = new SimpleMarkerSymbolClass();
+                        pMarkerSymbol.Color = GetRGB(220, 120, 60);
+                        pMarkerSymbol.Size = 2;
+                        pMarkerSymbol.Style = esriSimpleMarkerStyle.esriSMSDiamond;
+                        IElement pElement = pMarkerElement as IElement;
+
+                        //get the Element's interface object, which is used to set the element's Geometry
+                        pElement.Geometry = pPt;
+                        pMarkerElement.Symbol = pMarkerSymbol;
+                        IGraphicsContainer pGraphicsContainer = pMap as IGraphicsContainer;
+
+                        //add the element to the Map
+                        pGraphicsContainer.AddElement(pMarkerElement as IElement, 0);
+                        pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+                        break;
+                    }
+                case "DrawLine":
+                    {
+                        IPolyline pPolyline = axMapControl1.TrackLine() as IPolyline;
+                        //produce a SimplelineSymbol symbol
+                        ISimpleLineSymbol pSimpleLineSym = new SimpleLineSymbolClass();
+
+                        //require user dynamic selection
+                        pSimpleLineSym.Style = esriSimpleLineStyle.esriSLSSolid;
+                        pSimpleLineSym.Color = GetRGB(120, 200, 180);
+                        pSimpleLineSym.Width = 1;
+
+                        //produce a PolyLineElement object
+                        ILineElement pLineEle = new LineElementClass();
+                        IElement pEle = pLineEle as IElement;
+                        pEle.Geometry = pPolyline;
+
+                        //add the elements to the Map objects
+                        IGraphicsContainer pGraphicsContainer = pMap as IGraphicsContainer;
+                        pGraphicsContainer.AddElement(pEle, 0);
+                        pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+                        break;
+                    }
+                case "DrawPolygon":
+                    {
+                        IPolygon pPolygon = axMapControl1.TrackPolygon() as IPolygon;
+                        //produce a SimpleFillSymbol symbol
+                        ISimpleFillSymbol pSimpleFillSym = new SimpleFillSymbolClass();
+                        pSimpleFillSym.Style = esriSimpleFillStyle.esriSFSDiagonalCross;
+                        pSimpleFillSym.Color = GetRGB(220, 112, 60);
+
+                        //produce a PolygonElement object
+                        IFillShapeElement pPolygonEle = new PolygonElementClass();
+                        pPolygonEle.Symbol = pSimpleFillSym;
+                        IElement pEle = pPolygonEle as IElement;
+                        pEle.Geometry = pPolygon;
+
+                        //add the element to the Map object
+                        IGraphicsContainer pGraphicsContainer = pMap as IGraphicsContainer;
+                        pGraphicsContainer.AddElement(pEle, 0);
+                        pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+                        break;
+                    }
+                case "LabelMap":
+                    {
+                        //produce the text object, and set the corresponding attribute
+                        ITextElement pTextEle = new TextElementClass();
+                        pTextEle.Text = "Nanjing Tech University";
+                        IElement pEles = pTextEle as IElement;
+
+                        //sets the geometry properties of text characters
+                        IPoint pPoint = new PointClass();
+                        pPoint.PutCoords(e.mapX, e.mapY);
+                        pEles.Geometry = pPoint;
+
+                        //add to the Map object, and refresh to display
+                        IGraphicsContainer pGraphicsContainer = pMap as IGraphicsContainer;
+                        pGraphicsContainer.AddElement(pEles, 0);
+                        pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+
+                        //the method to set the color
+                        //to do...
+
+                        break;
+                    }
                 default:
                     break;
             }
         }
 
+
+        //drag the map layer up and down
+        ILayer pMovelayer;
+        int toIndex;
+        AxTOCControl axTOCControl1;
+        public AxTOCControl AxTOCControl1
+        {
+            get { return axTOCControl1; }
+            set { axTOCControl1 = value; }
+        }
+
+        ITOCControl mTOCControl;
+        public ITOCControl MTOCControl
+        {
+            get { return mTOCControl; }
+            set { mTOCControl = value; }
+        }
+
+        ITOCControlEvents_OnMouseDownEvent ted;
+        public ITOCControlEvents_OnMouseDownEvent Ted
+        {
+            get { return ted; }
+            set { ted = value; }
+        }
+
+        ITOCControlEvents_OnMouseUpEvent teu;
+        public ITOCControlEvents_OnMouseUpEvent Teu
+        {
+            get { return teu; }
+            set { teu = value; }
+        }
+
+        public void AdjLayMd()
+        {
+            esriTOCControlItem item = esriTOCControlItem.esriTOCControlItemNone;
+            if (ted.button == 1)  //mouse left key down
+            {
+                IBasicMap map = null;
+                ILayer layer = null;
+                object other = null;
+                object index = null;
+                mTOCControl.HitTest(ted.x, ted.y, ref item, ref map, ref layer, ref other, ref index);
+                if (item == esriTOCControlItem.esriTOCControlItemLayer)
+                {
+                    if (layer is IAnnotationSublayer)
+                        return;
+                    else
+                    {
+                        pMovelayer = layer;
+                    }
+                }
+            }
+            else if (ted.button == 2)  //mouse right key down
+            {
+                if (axMapControl1.LayerCount > 0)  //main view has the geo data
+                {
+                    esriTOCControlItem mItem = new esriTOCControlItem();
+                    IBasicMap pMap = new MapClass();
+                    ILayer pLayer = new FeatureLayerClass();
+                    object pOther = new object();
+                    object pIndex = new object();
+                    axTOCControl1.HitTest(ted.x, ted.y, ref mItem, ref pMap, ref pLayer, ref pOther, ref pIndex);
+                }
+            }
+        }
+
+        public void AdjLayMu()
+        {
+            if (teu.button == 1)
+            {
+                esriTOCControlItem item = esriTOCControlItem.esriTOCControlItemNone;
+                IBasicMap map = null;
+                ILayer layer = null;
+                object other = null;
+                object index = null;
+                mTOCControl.HitTest(teu.x, teu.y, ref item, ref map, ref layer, ref other, ref index);
+                IMap pMap = axMapControl1.ActiveView.FocusMap;
+                if (item == esriTOCControlItem.esriTOCControlItemLayer || layer != null)
+                {
+                    if (pMovelayer != layer)
+                    {
+                        ILayer pTempLayer;
+                        for (int i = 0; i < pMap.LayerCount; i++)
+                        {
+                            pTempLayer = pMap.get_Layer(i);
+                            if (pTempLayer == layer)
+                                toIndex = i;  //access the index number where mouse down position
+                        }
+                        pMap.MoveLayer(pMovelayer, toIndex);  //move the raw layer to the target layer position
+                        axMapControl1.ActiveView.Refresh();
+                        mTOCControl.Update();
+                    }
+                }
+            }
+        }
     }
 }

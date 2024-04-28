@@ -175,5 +175,61 @@ namespace test1
             pGeoMapOp.AxMapControl2 = axMapControl2;
             pGeoMapOp.OperateMapDoc();
         }
+
+        ILaySequAttr AdjLay = new GeoMapAO();
+        private void axTOCControl1_OnMouseDown(object sender, ITOCControlEvents_OnMouseDownEvent e)
+        {
+            AdjLay.AxMapControl1 = axMapControl1;
+            AdjLay.AxTOCControl1 = axTOCControl1;
+            AdjLay.Ted = e;
+            AdjLay.MTOCControl = axTOCControl1.Object as ITOCControl;
+            AdjLay.AdjLayMd();
+        }
+        private void axTOCControl1_OnMouseUp(object sender, ITOCControlEvents_OnMouseUpEvent e)
+        {
+            AdjLay.AxMapControl1 = axMapControl1;
+            AdjLay.AxTOCControl1 = axTOCControl1;
+            //adjust the order of the layer display
+            AdjLay.Teu = e;
+            AdjLay.AdjLayMu();
+        }
+       
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void axMapControl2_OnMouseDown(object sender, IMapControlEvents2_OnMouseDownEvent e)
+        {
+
+        }
+
+        private void drawPointToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GeoOpType = "DrawPoint";
+        }
+
+        private void drawLineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GeoOpType = "DrawLine";
+        }
+
+        private void drawPolygonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GeoOpType = "DrawPolygon";
+        }
+
+        private void labelMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GeoOpType = "LabelMap";
+        }
+
+        private void movemapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GeoOpType = "Movemap";
+        }
+
+
     }
 }
