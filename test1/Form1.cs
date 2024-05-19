@@ -140,41 +140,33 @@ namespace test1
             pAddGeoData.AddTINDataset();
         }
 
-        private void newDocToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            IGeoDataOper pGeoMapOp = new GeoMapAO();
-            pGeoMapOp.StrOperType = "NewDoc";
-            pGeoMapOp.AxMapControl1 = axMapControl1;
-            pGeoMapOp.AxMapControl2 = axMapControl2;
-            pGeoMapOp.OperateMapDoc();
-        }
-
         private void openDocToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            IGeoDataOper pGeoMapOp = new GeoMapAO();
-            pGeoMapOp.StrOperType = "OpenDoc";
-            pGeoMapOp.AxMapControl1 = axMapControl1;
-            pGeoMapOp.AxMapControl2 = axMapControl2;
-            pGeoMapOp.OperateMapDoc();
+            OpenFileDialog OpenDlg3 = new OpenFileDialog();
+            OpenDlg3.Title = "请选择地理数据文件";
+            OpenDlg3.Filter = "地图数据文件(*.mxd)|*.mxd";
+            OpenDlg3.ShowDialog();
+
+            string strFileName = OpenDlg3.FileName;
+            if (axMapControl1.CheckMxFile(strFileName))
+            {
+                axMapControl1.MousePointer = esriControlsMousePointer.esriPointerHourglass;
+                axMapControl1.LoadMxFile(strFileName, 0, Type.Missing);
+                axMapControl1.MousePointer = esriControlsMousePointer.esriPointerDefault;
+            }
+            else
+            {
+                MessageBox.Show("该文件不是地图文档文件", "信息提示");
+                return;
+
+            }
         }
 
         private void saveDocToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            IGeoDataOper pGeoMapOp = new GeoMapAO();
-            pGeoMapOp.StrOperType = "SaveDoc";
-            pGeoMapOp.AxMapControl1 = axMapControl1;
-            pGeoMapOp.AxMapControl2 = axMapControl2;
-            pGeoMapOp.OperateMapDoc();
+
         }
 
-        private void saveDocAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            IGeoDataOper pGeoMapOp = new GeoMapAO();
-            pGeoMapOp.StrOperType = "SaveDocAs";
-            pGeoMapOp.AxMapControl1 = axMapControl1;
-            pGeoMapOp.AxMapControl2 = axMapControl2;
-            pGeoMapOp.OperateMapDoc();
-        }
 
         ILaySequAttr AdjLay = new GeoMapAO();
         private void axTOCControl1_OnMouseDown(object sender, ITOCControlEvents_OnMouseDownEvent e)
@@ -184,14 +176,6 @@ namespace test1
             AdjLay.Ted = e;
             AdjLay.MTOCControl = axTOCControl1.Object as ITOCControl;
             AdjLay.AdjLayMd();
-        }
-        private void axTOCControl1_OnMouseUp(object sender, ITOCControlEvents_OnMouseUpEvent e)
-        {
-            AdjLay.AxMapControl1 = axMapControl1;
-            AdjLay.AxTOCControl1 = axTOCControl1;
-            //adjust the order of the layer display
-            AdjLay.Teu = e;
-            AdjLay.AdjLayMu();
         }
        
 
@@ -230,6 +214,14 @@ namespace test1
             GeoOpType = "Movemap";
         }
 
+        private void axTOCControl1_OnMouseUp_1(object sender, ITOCControlEvents_OnMouseUpEvent e)
+        {
+            AdjLay.AxMapControl1 = axMapControl1;
+            AdjLay.AxTOCControl1 = axTOCControl1;
+            //adjust the order of the layer display
+            AdjLay.Teu = e;
+            AdjLay.AdjLayMu();
+        }
 
     }
 }

@@ -23,7 +23,5 @@ namespace test1
         //Implement map interactive operation
         void OperMap();  
 
-        //Implement map document operation
-        void OperateMapDoc();
     }
 }

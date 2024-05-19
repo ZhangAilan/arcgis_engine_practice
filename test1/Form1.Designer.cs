@@ -38,16 +38,14 @@
             this.addTINToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.operateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lKZoomInToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newDocToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openDocToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveDocToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveDocAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.axLicenseControl1 = new ESRI.ArcGIS.Controls.AxLicenseControl();
-            this.movemapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.drawPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.drawLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.drawPolygonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.labelMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.movemapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDocToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveDocToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.axLicenseControl1 = new ESRI.ArcGIS.Controls.AxLicenseControl();
             this.axTOCControl1 = new ESRI.ArcGIS.Controls.AxTOCControl();
             this.axMapControl2 = new ESRI.ArcGIS.Controls.AxMapControl();
             this.axMapControl1 = new ESRI.ArcGIS.Controls.AxMapControl();
@@ -125,10 +123,8 @@
             this.drawPolygonToolStripMenuItem,
             this.labelMapToolStripMenuItem,
             this.movemapToolStripMenuItem,
-            this.newDocToolStripMenuItem,
             this.openDocToolStripMenuItem,
-            this.saveDocToolStripMenuItem,
-            this.saveDocAsToolStripMenuItem});
+            this.saveDocToolStripMenuItem});
             this.operateToolStripMenuItem.Name = "operateToolStripMenuItem";
             this.operateToolStripMenuItem.Size = new System.Drawing.Size(88, 29);
             this.operateToolStripMenuItem.Text = "Operate";
@@ -139,50 +135,6 @@
             this.lKZoomInToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
             this.lKZoomInToolStripMenuItem.Text = "LKZoomIn";
             this.lKZoomInToolStripMenuItem.Click += new System.EventHandler(this.lKZoomInToolStripMenuItem_Click);
-            // 
-            // newDocToolStripMenuItem
-            // 
-            this.newDocToolStripMenuItem.Name = "newDocToolStripMenuItem";
-            this.newDocToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
-            this.newDocToolStripMenuItem.Text = "NewDoc";
-            this.newDocToolStripMenuItem.Click += new System.EventHandler(this.newDocToolStripMenuItem_Click);
-            // 
-            // openDocToolStripMenuItem
-            // 
-            this.openDocToolStripMenuItem.Name = "openDocToolStripMenuItem";
-            this.openDocToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
-            this.openDocToolStripMenuItem.Text = "OpenDoc";
-            this.openDocToolStripMenuItem.Click += new System.EventHandler(this.openDocToolStripMenuItem_Click);
-            // 
-            // saveDocToolStripMenuItem
-            // 
-            this.saveDocToolStripMenuItem.Name = "saveDocToolStripMenuItem";
-            this.saveDocToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
-            this.saveDocToolStripMenuItem.Text = "SaveDoc";
-            this.saveDocToolStripMenuItem.Click += new System.EventHandler(this.saveDocToolStripMenuItem_Click);
-            // 
-            // saveDocAsToolStripMenuItem
-            // 
-            this.saveDocAsToolStripMenuItem.Name = "saveDocAsToolStripMenuItem";
-            this.saveDocAsToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
-            this.saveDocAsToolStripMenuItem.Text = "SaveDocAs";
-            this.saveDocAsToolStripMenuItem.Click += new System.EventHandler(this.saveDocAsToolStripMenuItem_Click);
-            // 
-            // axLicenseControl1
-            // 
-            this.axLicenseControl1.Enabled = true;
-            this.axLicenseControl1.Location = new System.Drawing.Point(668, 418);
-            this.axLicenseControl1.Name = "axLicenseControl1";
-            this.axLicenseControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axLicenseControl1.OcxState")));
-            this.axLicenseControl1.Size = new System.Drawing.Size(32, 32);
-            this.axLicenseControl1.TabIndex = 5;
-            // 
-            // movemapToolStripMenuItem
-            // 
-            this.movemapToolStripMenuItem.Name = "movemapToolStripMenuItem";
-            this.movemapToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
-            this.movemapToolStripMenuItem.Text = "Movemap";
-            this.movemapToolStripMenuItem.Click += new System.EventHandler(this.movemapToolStripMenuItem_Click);
             // 
             // drawPointToolStripMenuItem
             // 
@@ -212,6 +164,36 @@
             this.labelMapToolStripMenuItem.Text = "LabelMap";
             this.labelMapToolStripMenuItem.Click += new System.EventHandler(this.labelMapToolStripMenuItem_Click);
             // 
+            // movemapToolStripMenuItem
+            // 
+            this.movemapToolStripMenuItem.Name = "movemapToolStripMenuItem";
+            this.movemapToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
+            this.movemapToolStripMenuItem.Text = "Movemap";
+            this.movemapToolStripMenuItem.Click += new System.EventHandler(this.movemapToolStripMenuItem_Click);
+            // 
+            // openDocToolStripMenuItem
+            // 
+            this.openDocToolStripMenuItem.Name = "openDocToolStripMenuItem";
+            this.openDocToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
+            this.openDocToolStripMenuItem.Text = "OpenDoc";
+            this.openDocToolStripMenuItem.Click += new System.EventHandler(this.openDocToolStripMenuItem_Click);
+            // 
+            // saveDocToolStripMenuItem
+            // 
+            this.saveDocToolStripMenuItem.Name = "saveDocToolStripMenuItem";
+            this.saveDocToolStripMenuItem.Size = new System.Drawing.Size(191, 30);
+            this.saveDocToolStripMenuItem.Text = "SaveDoc";
+            this.saveDocToolStripMenuItem.Click += new System.EventHandler(this.saveDocToolStripMenuItem_Click);
+            // 
+            // axLicenseControl1
+            // 
+            this.axLicenseControl1.Enabled = true;
+            this.axLicenseControl1.Location = new System.Drawing.Point(668, 418);
+            this.axLicenseControl1.Name = "axLicenseControl1";
+            this.axLicenseControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axLicenseControl1.OcxState")));
+            this.axLicenseControl1.Size = new System.Drawing.Size(32, 32);
+            this.axLicenseControl1.TabIndex = 5;
+            // 
             // axTOCControl1
             // 
             this.axTOCControl1.Location = new System.Drawing.Point(12, 36);
@@ -220,6 +202,7 @@
             this.axTOCControl1.Size = new System.Drawing.Size(294, 340);
             this.axTOCControl1.TabIndex = 2;
             this.axTOCControl1.OnMouseDown += new ESRI.ArcGIS.Controls.ITOCControlEvents_Ax_OnMouseDownEventHandler(this.axTOCControl1_OnMouseDown);
+            this.axTOCControl1.OnMouseUp += new ESRI.ArcGIS.Controls.ITOCControlEvents_Ax_OnMouseUpEventHandler(this.axTOCControl1_OnMouseUp_1);
             // 
             // axMapControl2
             // 
@@ -279,10 +262,8 @@
         private System.Windows.Forms.ToolStripMenuItem addRasterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openCADToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addTINToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem newDocToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openDocToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveDocToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveDocAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem drawPointToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem drawLineToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem drawPolygonToolStripMenuItem;

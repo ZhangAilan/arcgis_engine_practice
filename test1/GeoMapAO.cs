@@ -13,6 +13,7 @@ using ESRI.ArcGIS.esriSystem;
 using ESRI.ArcGIS.DataSourcesFile;
 using ESRI.ArcGIS.DataSourcesRaster;
 using ESRI.ArcGIS.Geodatabase;
+using ESRI.ArcGIS.Output;
 
 namespace test1
 {
@@ -177,88 +178,6 @@ namespace test1
                 AxMapControl1.AddLayer(pTinLayer as ILayer, 0);
             }
         }
-
-        //load the mapdocument
-        public void OperateMapDoc()
-        {
-            OpenFileDialog OpenFileDlg = new OpenFileDialog();
-            SaveFileDialog SaveFileDlg = new SaveFileDialog();
-            OpenFileDlg.Filter = "Map Doc File(*.mxd)|*.mxd";
-            SaveFileDlg.Filter = "Map Doc File(*.mxd)|*.mxd";
-            string strDocFileN = string.Empty;
-            IMapDocument pMapDocument = new MapDocumentClass();
-
-            switch (StrOperType)
-            {
-                case "NewDoc":
-                    {
-                        SaveFileDlg.Title = "Choose the map document!";
-                        SaveFileDlg.ShowDialog();
-                        strDocFileN = SaveFileDlg.FileName;
-                        if (strDocFileN == string.Empty)
-                            return;
-                        pMapDocument.New(strDocFileN);
-                        pMapDocument.Open(strDocFileN, "");
-                        AxMapControl1.Map = pMapDocument.get_Map(0);
-                        break;
-                    }
-                case "OpenDoc":
-                    {
-                        OpenFileDlg.Title = "Choose the map document!";
-                        OpenFileDlg.ShowDialog();
-                        strDocFileN = OpenFileDlg.FileName;
-                        if (strDocFileN == string.Empty)
-                            return;
-                        //Load the data into te pMapDocument and associate it with the map control
-                        pMapDocument.Open(strDocFileN, "");
-                        for (int i = 0; i < pMapDocument.MapCount; i++)
-                        {
-                            AxMapControl1.Map = pMapDocument.get_Map(i); //loop all the possible map objects
-                        }
-                        AxMapControl1.Refresh();
-                        break;
-                    }
-                case "SaveDoc":
-                    {
-                        //Determine whether the document is read-only
-                        if (pMapDocument.get_IsReadOnly(pMapDocument.DocumentFilename) == true)
-                        {
-                            MessageBox.Show("This map document is read only", "Warning!");
-                            return;
-                        }
-                        //save with the relative path
-                        pMapDocument.Save(pMapDocument.UsesRelativePaths, true);
-                        MessageBox.Show("Save Successfully!", "Info");
-                        break;
-                    }
-                case "SaveDocAs":
-                    {
-                        SaveFileDlg.Title = "Save the map file with new path.";
-                        SaveFileDlg.ShowDialog();
-                        strDocFileN = SaveFileDlg.FileName;
-                        if (strDocFileN == string.Empty)
-                            return;
-                        if (strDocFileN == pMapDocument.DocumentFilename)
-                        {
-                            //Save the modified map document in the original file
-                            //Save with the relative path
-                            pMapDocument.Save(pMapDocument.UsesRelativePaths, true);
-                            MessageBox.Show("Save successfully!", "Info");
-                            break;
-                        }
-                        else
-                        {
-                            //Svae the modified map document in the new file
-                            pMapDocument.SaveAs(strDocFileN, true, true);
-                            MessageBox.Show("Save successfully!", "Info");
-                            break;
-                        }
-                    }
-                default:
-                    break;
-            }
-        }
-
 
 
         //the interface of mouse and map interaction
