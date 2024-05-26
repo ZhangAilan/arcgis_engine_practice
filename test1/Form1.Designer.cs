@@ -49,6 +49,15 @@
             this.axTOCControl1 = new ESRI.ArcGIS.Controls.AxTOCControl();
             this.axMapControl2 = new ESRI.ArcGIS.Controls.AxMapControl();
             this.axMapControl1 = new ESRI.ArcGIS.Controls.AxMapControl();
+            this.synbolMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.simpleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.classicBreakRenderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uniqueBreakRenderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.proportionalSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.barChartSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stackedChartSymbolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pieChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dotDensityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axLicenseControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.axTOCControl1)).BeginInit();
@@ -60,10 +69,11 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.operateToolStripMenuItem});
+            this.operateToolStripMenuItem,
+            this.synbolMapToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(910, 33);
+            this.menuStrip1.Size = new System.Drawing.Size(1209, 33);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -209,7 +219,7 @@
             this.axMapControl2.Location = new System.Drawing.Point(12, 382);
             this.axMapControl2.Name = "axMapControl2";
             this.axMapControl2.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMapControl2.OcxState")));
-            this.axMapControl2.Size = new System.Drawing.Size(294, 291);
+            this.axMapControl2.Size = new System.Drawing.Size(294, 366);
             this.axMapControl2.TabIndex = 4;
             this.axMapControl2.OnMouseDown += new ESRI.ArcGIS.Controls.IMapControlEvents2_Ax_OnMouseDownEventHandler(this.axMapControl2_OnMouseDown);
             // 
@@ -218,15 +228,87 @@
             this.axMapControl1.Location = new System.Drawing.Point(312, 36);
             this.axMapControl1.Name = "axMapControl1";
             this.axMapControl1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMapControl1.OcxState")));
-            this.axMapControl1.Size = new System.Drawing.Size(586, 637);
+            this.axMapControl1.Size = new System.Drawing.Size(885, 712);
             this.axMapControl1.TabIndex = 3;
             this.axMapControl1.OnMouseDown += new ESRI.ArcGIS.Controls.IMapControlEvents2_Ax_OnMouseDownEventHandler(this.axMapControl1_OnMouseDown);
+            // 
+            // synbolMapToolStripMenuItem
+            // 
+            this.synbolMapToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.simpleToolStripMenuItem,
+            this.classicBreakRenderToolStripMenuItem,
+            this.uniqueBreakRenderToolStripMenuItem,
+            this.proportionalSymbolToolStripMenuItem,
+            this.barChartSymbolToolStripMenuItem,
+            this.stackedChartSymbolToolStripMenuItem,
+            this.pieChartToolStripMenuItem,
+            this.dotDensityToolStripMenuItem});
+            this.synbolMapToolStripMenuItem.Name = "synbolMapToolStripMenuItem";
+            this.synbolMapToolStripMenuItem.Size = new System.Drawing.Size(177, 29);
+            this.synbolMapToolStripMenuItem.Text = "SymbolMapRender";
+            this.synbolMapToolStripMenuItem.Click += new System.EventHandler(this.synbolMapToolStripMenuItem_Click);
+            // 
+            // simpleToolStripMenuItem
+            // 
+            this.simpleToolStripMenuItem.Name = "simpleToolStripMenuItem";
+            this.simpleToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.simpleToolStripMenuItem.Text = "Simple";
+            this.simpleToolStripMenuItem.Click += new System.EventHandler(this.simpleToolStripMenuItem_Click);
+            // 
+            // classicBreakRenderToolStripMenuItem
+            // 
+            this.classicBreakRenderToolStripMenuItem.Name = "classicBreakRenderToolStripMenuItem";
+            this.classicBreakRenderToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.classicBreakRenderToolStripMenuItem.Text = "ClassicBreak";
+            this.classicBreakRenderToolStripMenuItem.Click += new System.EventHandler(this.classicBreakRenderToolStripMenuItem_Click);
+            // 
+            // uniqueBreakRenderToolStripMenuItem
+            // 
+            this.uniqueBreakRenderToolStripMenuItem.Name = "uniqueBreakRenderToolStripMenuItem";
+            this.uniqueBreakRenderToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.uniqueBreakRenderToolStripMenuItem.Text = "UniqueValue";
+            this.uniqueBreakRenderToolStripMenuItem.Click += new System.EventHandler(this.uniqueBreakRenderToolStripMenuItem_Click);
+            // 
+            // proportionalSymbolToolStripMenuItem
+            // 
+            this.proportionalSymbolToolStripMenuItem.Name = "proportionalSymbolToolStripMenuItem";
+            this.proportionalSymbolToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.proportionalSymbolToolStripMenuItem.Text = "ProportionalSymbol";
+            this.proportionalSymbolToolStripMenuItem.Click += new System.EventHandler(this.proportionalSymbolToolStripMenuItem_Click);
+            // 
+            // barChartSymbolToolStripMenuItem
+            // 
+            this.barChartSymbolToolStripMenuItem.Name = "barChartSymbolToolStripMenuItem";
+            this.barChartSymbolToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.barChartSymbolToolStripMenuItem.Text = "BarChartSymbol";
+            this.barChartSymbolToolStripMenuItem.Click += new System.EventHandler(this.barChartSymbolToolStripMenuItem_Click);
+            // 
+            // stackedChartSymbolToolStripMenuItem
+            // 
+            this.stackedChartSymbolToolStripMenuItem.Name = "stackedChartSymbolToolStripMenuItem";
+            this.stackedChartSymbolToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.stackedChartSymbolToolStripMenuItem.Text = "StackedChartSymbol";
+            this.stackedChartSymbolToolStripMenuItem.Click += new System.EventHandler(this.stackedChartSymbolToolStripMenuItem_Click);
+            // 
+            // pieChartToolStripMenuItem
+            // 
+            this.pieChartToolStripMenuItem.Name = "pieChartToolStripMenuItem";
+            this.pieChartToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.pieChartToolStripMenuItem.Text = "PieChart";
+            this.pieChartToolStripMenuItem.Click += new System.EventHandler(this.pieChartToolStripMenuItem_Click);
+            // 
+            // dotDensityToolStripMenuItem
+            // 
+            this.dotDensityToolStripMenuItem.Name = "dotDensityToolStripMenuItem";
+            this.dotDensityToolStripMenuItem.Size = new System.Drawing.Size(249, 30);
+            this.dotDensityToolStripMenuItem.Text = "DotDensity";
+            this.dotDensityToolStripMenuItem.Click += new System.EventHandler(this.dotDensityToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(910, 685);
+            this.ClientSize = new System.Drawing.Size(1209, 760);
             this.Controls.Add(this.axTOCControl1);
             this.Controls.Add(this.axLicenseControl1);
             this.Controls.Add(this.axMapControl2);
@@ -269,6 +351,15 @@
         private System.Windows.Forms.ToolStripMenuItem drawPolygonToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem labelMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem movemapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem synbolMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem simpleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem classicBreakRenderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem uniqueBreakRenderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem proportionalSymbolToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem barChartSymbolToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stackedChartSymbolToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pieChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dotDensityToolStripMenuItem;
     }
 }
 
