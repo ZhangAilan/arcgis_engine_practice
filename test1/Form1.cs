@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Collections;
 using System.Windows.Forms;
-using ESRI.ArcGIS.Controls;
 using ESRI.ArcGIS.Carto;
-using ESRI.ArcGIS.Geometry;
-using ESRI.ArcGIS.Display;
-using ESRI.ArcGIS.SystemUI;
-using ESRI.ArcGIS.esriSystem;
-using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.DataSourcesFile;
 using ESRI.ArcGIS.DataSourcesRaster;
+using ESRI.ArcGIS.Geodatabase;
+using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.DisplayUI;
+using ESRI.ArcGIS.Controls;
+using ESRI.ArcGIS.ArcMapUI;
+using ESRI.ArcGIS.SystemUI;
+using ESRI.ArcGIS.Geometry;
 
 
 namespace test1
@@ -23,6 +24,7 @@ namespace test1
     public partial class Form1 : Form
     {
         string GeoOpType = string.Empty;
+        private string tool = "";
 
         public Form1()
         {
@@ -682,6 +684,376 @@ namespace test1
             this.axMapControl1.Refresh();
         }
 
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void axMapControl1_OnMouseDown_1(object sender, IMapControlEvents2_OnMouseDownEvent e)
+        {
+            switch (tool)
+            {
+                case "点查询":
+                    double x = e.mapX;
+                    double y = e.mapY;
+                    string Re_Field = null;
+                    Re_Field = GetField(x, y);
+                    MessageBox.Show(Re_Field);
+                    break;
+                case "面查询":
+                    IPolygon pPolygon = null;
+                    pPolygon = (IPolygon)this.axMapControl1.TrackPolygon();
+                    SelectMouseTrack(pPolygon);
+                    axMapControl1.Refresh();
+                    break;
+                case "线查询":
+                    IPolyline pPolyline = null;
+                    pPolyline = (IPolyline)this.axMapControl1.TrackLine();
+                    SelectMouseTrackLine(pPolyline);
+                    axMapControl1.Refresh();
+                    break;
+                default:
+                    break;
+            }
+
+            if (GeoOpType == string.Empty)
+                return;
+            IGeoDataOper pGeoMapOp = new GeoMapAO();
+            pGeoMapOp.StrOperType = GeoOpType;
+            pGeoMapOp.AxMapControl1 = axMapControl1;
+            pGeoMapOp.AxMapControl2 = axMapControl2;
+            pGeoMapOp.E = e;
+            pGeoMapOp.OperMap();
+        }
+
+        //点查询并显示字段值
+        string Layer_Name = "townshp";   //所需获取的图层的名称
+        string FieldName = "CON_NAME";  // 所需获取的属性名称，为字符串类型
+        public string GetField(double x, double y)//根据坐标图层名得到指定属性值，返回得到的属性值，获取失败则返回null
+        {
+            IMap pMap = this.axMapControl1.Map;  //为传递的参数，一个IMap地图接口类型的变量，为原始地图
+            if (FieldName == null) return null;
+            double CorX = x;
+            double CorY = y;
+            string Re_Field = null;//最后返回的变量值
+            IActiveView pActiveView = pMap as IActiveView;
+            int LayerCount = pMap.LayerCount;
+            if (LayerCount == 0) return null;//地图中没有图层
+            int i;
+
+            bool IsHave = false;
+            int findresult = -1;
+            for (i = 0; i < LayerCount; i++)
+            {
+                IFeatureLayer pFeaturelayer = pMap.get_Layer(i) as IFeatureLayer;
+                if (pFeaturelayer == null)
+                {
+                    continue;
+                }
+                IFeatureClass pFeatureClass = pFeaturelayer.FeatureClass;
+                if (pFeaturelayer.Name != Layer_Name) continue;//找到指定获取的图层
+
+                IsHave = true;
+                IPoint point = new PointClass();//创建点
+                point.X = CorX;
+                point.Y = CorY;
+                //ITopologicalOperator接口用来通过对已存在的几何对象做空间拓扑运算以产生新的结合对象。缓冲区分析，裁剪几何图形，几何图形差分操作，几何图形合并操作等都需要使用此接口。 
+                ITopologicalOperator pTOpo = point as ITopologicalOperator;
+                double length;
+                length = ConvertPixelsToMapUnits(pActiveView, 4);
+
+                IGeometry pBuffer = pTOpo.Buffer(length);
+                IGeometry pGeo = pBuffer.Envelope;
+
+                ISpatialFilter pSpatialFilter = new SpatialFilterClass();//空间滤过器
+                pSpatialFilter.Geometry = pGeo;
+
+                switch (pFeatureClass.ShapeType)//判断当前图层的类型、点？线？面？....
+                {
+                    case esriGeometryType.esriGeometryPoint:
+                        pSpatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelContains;
+                        break;
+                    case esriGeometryType.esriGeometryPolyline:
+                        pSpatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelCrosses;
+                        break;
+                    case esriGeometryType.esriGeometryPolygon:
+                        pSpatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelIntersects;
+                        break;
+                }
+                IFeatureSelection pFselection = pFeaturelayer as IFeatureSelection;
+                pFselection.SelectFeatures(pSpatialFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+
+                ISelectionSet pSelectionset = pFselection.SelectionSet;
+                ICursor pCursor;
+                pSelectionset.Search(null, true, out pCursor);
+                IFeatureCursor pFeatCursor = pCursor as IFeatureCursor;//通过游标来查询
+                IFeature pFeature = pFeatCursor.NextFeature();
+
+                while (pFeature != null)
+                {
+                    pMap.SelectFeature(pFeaturelayer, pFeature);
+                    findresult = pFeature.Fields.FindField(FieldName);
+
+                    if (findresult == -1)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Re_Field = pFeature.get_Value(findresult).ToString();//通过属性名来寻找属性，得到结果
+                    }
+                    //               count=pFeature.Fields.FieldCount;
+
+                    pFeature = pFeatCursor.NextFeature();
+                }
+
+                //显示查找到得要素
+                ILayer m_pCurrentLayer = pMap.get_Layer(i);
+                IFeatureSelection pFeatSelection = m_pCurrentLayer as IFeatureSelection;
+                IQueryFilter pFilter = pSpatialFilter;
+                pFeatSelection.SelectFeatures(pFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+                pFilter = null;
+                if (findresult != -1)
+                {
+                    break;
+                }
+            }
+
+            pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGraphicSelection, null, null);
+
+            if (IsHave)
+            {
+                this.axMapControl1.Refresh();
+                return Re_Field;
+            }
+            else
+                return null;
+        }
+
+        //距离转换函数
+        private double ConvertPixelsToMapUnits(IActiveView pActiveView, double pixelUnits)
+        {
+            // Uses the ratio of the size of the map in pixels to map units to do the conversion
+            IPoint p1 = pActiveView.ScreenDisplay.DisplayTransformation.VisibleBounds.UpperLeft;
+            IPoint p2 = pActiveView.ScreenDisplay.DisplayTransformation.VisibleBounds.UpperRight;
+            int x1, x2, y1, y2;
+            pActiveView.ScreenDisplay.DisplayTransformation.FromMapPoint(p1, out x1, out y1);
+            pActiveView.ScreenDisplay.DisplayTransformation.FromMapPoint(p2, out x2, out y2);
+            double pixelExtent = x2 - x1;
+            double realWorldDisplayExtent = pActiveView.ScreenDisplay.DisplayTransformation.VisibleBounds.Width;
+            double sizeOfOnePixel = realWorldDisplayExtent / pixelExtent;
+            return pixelUnits * sizeOfOnePixel;
+        }
+
+        //面查询
+        void SelectMouseTrack(IGeometry pGeo)
+        {
+            //IFeatureLayer m_pCurrentLayer = this.axMapControl1.Map.get_Layer(0) as IFeatureLayer;
+            IFeatureLayer pFeatureLayer = this.axMapControl1.Map.get_Layer(0) as IFeatureLayer;
+
+            ESRI.ArcGIS.Geodatabase.ISpatialFilter pSpatialFilter = new SpatialFilterClass();
+            pSpatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelIntersects;
+            //设置Geometry属性
+            pSpatialFilter.Geometry = pGeo;
+            //设置GeometryField属性
+            //pSpatialFilter.GeometryField = pFeatureLayer.FeatureClass.ShapeFieldName;
+
+            //查询过滤器
+            IQueryFilter pFilter = pSpatialFilter;
+            //IFeatureCursor m_pCursor = pFeatureLayer.Search(pFilter, false);
+            //IFeature m_pFeature = m_pCursor.NextFeature();
+
+            //显示查找到得要素
+            IFeatureSelection pFeatSelection = pFeatureLayer as IFeatureSelection;
+            pFeatSelection.SelectFeatures(pFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+            pFilter = null;
+            this.axMapControl1.Refresh();
+        }
+
+        //线查询
+        void SelectMouseTrackLine(IGeometry pGeo)
+        {
+            //IFeatureLayer m_pCurrentLayer = this.axMapControl1.Map.get_Layer(0) as IFeatureLayer;
+            IFeatureLayer pFeatureLayer = this.axMapControl1.Map.get_Layer(0) as IFeatureLayer;
+
+            ESRI.ArcGIS.Geodatabase.ISpatialFilter pSpatialFilter = new SpatialFilterClass();
+            pSpatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelCrosses;
+            //设置Geometry属性
+            pSpatialFilter.Geometry = pGeo;
+            //设置GeometryField属性
+            //pSpatialFilter.GeometryField = pFeatureLayer.FeatureClass.ShapeFieldName;
+            //查询过滤器
+            IQueryFilter pFilter = pSpatialFilter;
+            IFeatureCursor m_pCursor = pFeatureLayer.Search(pFilter, false);
+            IFeature m_pFeature = m_pCursor.NextFeature();
+
+            //显示查找到得要素
+            IFeatureSelection pFeatSelection = pFeatureLayer as IFeatureSelection;
+            pFeatSelection.SelectFeatures(pFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+            pFilter = null;
+            this.axMapControl1.Refresh();
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void 查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 点查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tool = "点查询";
+            axMapControl1.MousePointer = ESRI.ArcGIS.Controls.esriControlsMousePointer.esriPointerCrosshair;
+        }
+
+        private void 面查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tool = "面查询";
+            axMapControl1.MousePointer = ESRI.ArcGIS.Controls.esriControlsMousePointer.esriPointerCrosshair;
+        }
+
+        private void 线查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tool = "线查询";
+            axMapControl1.MousePointer = ESRI.ArcGIS.Controls.esriControlsMousePointer.esriPointerCrosshair;
+        }
+
+        private void 刷新ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IFeatureLayer layer = this.axMapControl1.Map.get_Layer(0) as IFeatureLayer;
+            System.Data.DataTable dt = new DataTable();
+            dt = GetLayerData(layer);
+            this.dataGridView1.DataSource = dt;
+            this.tabControl1.SelectedIndex = 1;
+        }
+        //获得属性表
+        static public DataTable GetLayerData(IFeatureLayer layer)
+        {
+            DataTable dt = new DataTable();
+            Dictionary<string, int> columnKey = new Dictionary<string, int>();
+            List<string> columns = new List<string>();
+            for (int i = 0; i < layer.FeatureClass.Fields.FieldCount; i++)
+            {
+                string s = layer.FeatureClass.Fields.get_Field(i).Name;
+                columns.Add(s);
+            }
+            // List<string> columns = Lib.Layer.getLayerField(layer);
+            for (int i = 0; i < columns.Count; i++)
+            {
+                if (columns[i] != "FID" && columns[i] != "Shape")
+                {
+                    dt.Columns.Add(columns[i]);
+                    columnKey.Add(columns[i], i);
+                }
+            }
+            int fragFetureCount = layer.FeatureClass.FeatureCount(null);
+            for (int i = 0; i < fragFetureCount; i++)
+            {
+                DataRow dr = dt.NewRow();
+                IFeature pFeature = layer.FeatureClass.GetFeature(i);
+                for (int j = 0; j < dt.Columns.Count; j++)
+                {
+                    int index = columnKey[dt.Columns[j].ColumnName];
+                    dr[j] = pFeature.get_Value(index);
+                }
+                dt.Rows.Add(dr);
+            }
+            return dt;
+        }
+
+        private void 刷新ToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            axMapControl1.MousePointer = ESRI.ArcGIS.Controls.esriControlsMousePointer.esriPointerDefault;
+        }
+
+        private void openToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenDB();
+        }
+
+        //打开DB
+        void OpenDB()
+        {
+            IWorkspaceFactory pWorkspaceFactory;
+            IFeatureWorkspace pFeatureWorkspace;
+            //IFeatureClass pFeatureClass;
+
+            OpenFileDialog of = new OpenFileDialog();
+            of.Filter = "GeoDatabase(*.mdb)|*.mdb";
+            of.Multiselect = false;
+            DialogResult pDialogResult = of.ShowDialog();
+            if (pDialogResult == DialogResult.OK)
+            {
+                string pPath = of.FileName;
+                //获得File Geodatabase类型数据库中的数据的工作空间工厂类 -- FileGDBWorkspaceFactoryClass
+                //pWorkspaceFactory = new FileGDBWorkspaceFactoryClass();
+                //获得Personal Geodatabase类型数据库中的数据的工作空间工厂类 -- AccessWorkspaceFactoryClass
+                pWorkspaceFactory = new ESRI.ArcGIS.DataSourcesGDB.AccessWorkspaceFactoryClass();
+                pFeatureWorkspace = pWorkspaceFactory.OpenFromFile(pPath, 0) as IFeatureWorkspace;
+
+                //打开数据文件中的表
+                //pFeatureClass = pFeatureWorkspace.OpenFeatureClass("wayshp");
+                System.Collections.ArrayList arrayFtInFWS = new ArrayList();
+                System.Collections.ArrayList arrayTab = new ArrayList();
+                IWorkspace pWs = (IWorkspace)pFeatureWorkspace;
+                IEnumDataset pEnumDs = pWs.get_Datasets(esriDatasetType.esriDTAny);
+                IDataset pDs = pEnumDs.Next();
+                while (pDs != null)
+                {
+                    esriDatasetType esriDSType = pDs.Type;
+                    if (esriDSType == esriDatasetType.esriDTTable)
+                    {
+                        ITable pTable = (ITable)pDs;
+                        arrayTab.Add(pTable);
+                        pDs = pEnumDs.Next();
+                    }
+                    else if (esriDSType == esriDatasetType.esriDTFeatureClass) //找到要素类
+                    {
+                        IFeatureClass ipFtClass = (IFeatureClass)pDs;
+                        IFeatureLayer pFeatureLayer = new FeatureLayer();
+                        pFeatureLayer.FeatureClass = ipFtClass;
+                        pFeatureLayer.Name = ipFtClass.AliasName;
+                        arrayFtInFWS.Add(pFeatureLayer);
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(ipFtClass);
+                        pDs = pEnumDs.Next();
+                    }
+                    else if (esriDSType == esriDatasetType.esriDTFeatureDataset) //找到要素集)
+                    {
+                        IFeatureDataset pFtDs = (IFeatureDataset)pDs;
+                        //GetFcNameInDs(pFtDs, ref arrayFtInFWS); //获取IFeatureDataset中的所有featureclass
+                        //利用IFeatureClassContainer对象遍历IFeatureDataset
+                        IFeatureClassContainer m_FeatureClassContainer = (IFeatureClassContainer)pFtDs;
+                        IEnumFeatureClass m_EnumFC = m_FeatureClassContainer.Classes;
+                        IFeatureClass m_FeatureClass = m_EnumFC.Next();
+                        while (m_FeatureClass != null)
+                        {
+                            IFeatureLayer m_FeatureLayer = new FeatureLayerClass();
+                            m_FeatureLayer.FeatureClass = m_FeatureClass;
+                            arrayFtInFWS.Add(m_FeatureLayer);
+                            m_FeatureClass = m_EnumFC.Next();
+                        }
+                        pDs = pEnumDs.Next();
+                    }
+                }
+                //IFeatureLayer pFLayer = new FeatureLayerClass();
+                //pFLayer.FeatureClass = pFeatureClass;
+                //pFLayer.Name = pFeatureClass.AliasName;
+                //ILayer pLayer = pFLayer as ILayer;
+                IMap pMap = axMapControl1.Map;
+                //pMap.AddLayer(pLayer);                
+                for (int i = 0; i < arrayFtInFWS.Count; i++)
+                {
+                    ILayer pLayer = arrayFtInFWS[i] as ILayer;
+                    pMap.AddLayer(pLayer);
+                }
+                axMapControl1.ActiveView.Refresh();
+                MessageBox.Show(axMapControl1.Map.LayerCount.ToString());
+            }
+        }
 
     }
 }
