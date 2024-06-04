@@ -183,7 +183,8 @@ namespace test1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+            pMap = this.axMapControl1.Map;
+            pActiveView = this.axMapControl1.ActiveView;
         }
 
         private void axMapControl2_OnMouseDown(object sender, IMapControlEvents2_OnMouseDownEvent e)
@@ -726,7 +727,7 @@ namespace test1
             pGeoMapOp.OperMap();
         }
 
-        //点查询并显示字段值
+        //点查询并显示字段值，只能查询这一个图层
         string Layer_Name = "townshp";   //所需获取的图层的名称
         string FieldName = "CON_NAME";  // 所需获取的属性名称，为字符串类型
         public string GetField(double x, double y)//根据坐标图层名得到指定属性值，返回得到的属性值，获取失败则返回null
@@ -1053,6 +1054,99 @@ namespace test1
                 axMapControl1.ActiveView.Refresh();
                 MessageBox.Show(axMapControl1.Map.LayerCount.ToString());
             }
+        }
+
+        IMap pMap;
+        IActiveView pActiveView;
+
+        public ILayer GetLyr(string lyrName)
+        {
+            ILayer lyr = null;
+            for (int i = 0; i < this.axMapControl1.LayerCount; i++)
+            {
+                if (this.axMapControl1.get_Layer(i).Name == lyrName)
+                {
+                    lyr = this.axMapControl1.get_Layer(i);
+                    break;
+                }
+            }
+            return lyr;
+        }
+
+        private void 认识查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ILayer Lyr = GetLyr("townshp");
+            IFeatureLayer pFeatureLayer = Lyr as IFeatureLayer;
+            ESRI.ArcGIS.Geodatabase.IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
+
+            IQueryFilter pQueryFilter = new QueryFilter();//实例化一个查询条件对象   
+            pQueryFilter.WhereClause = " CON_ID=18 ";//将查询条件赋值           
+            IFeatureCursor pFeatureCursor = pFeatureClass.Search(pQueryFilter, false);
+            IFeature pFeature = pFeatureCursor.NextFeature();
+            //Map.ClearSelection();//清除地图的选择
+            int num = 0;
+            //IFields pFlds = pFeature.Fields;
+            //int iType = pFlds.FindField("Type");
+            while (pFeature != null)
+            {
+
+                pFeature = pFeatureCursor.NextFeature();
+                num++;
+            }
+            MessageBox.Show("查询元素统计：" + num.ToString());
+        }
+
+        //利用QueryFilter属性查询
+        private void 属性查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ILayer Lyr = GetLyr("townshp");
+            IFeatureLayer pFeatureLayer = Lyr as IFeatureLayer;
+            IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
+
+            IQueryFilter pQueryFilter = new QueryFilter();//实例化一个查询条件对象   
+            pQueryFilter.WhereClause = " CON_ID=18";//将查询条件赋值           
+            ESRI.ArcGIS.Carto.IFeatureSelection pFeatureSelection = pFeatureLayer as IFeatureSelection;
+            pFeatureSelection.SelectFeatures(pQueryFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+            pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
+        }
+
+        //利用SpatialFilterClass查询
+        private void 空间查询ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ILayer Lyr = GetLyr("townshp");
+            IFeatureLayer pFeatureLayer = Lyr as IFeatureLayer;
+            IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
+
+            ISpatialFilter pFilter = new SpatialFilterClass();//设置空间过滤器的三个必须属性
+
+            pFilter.Geometry = GetGeo(); //要素查询工具
+            pFilter.GeometryField = "Shape";
+            pFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelIntersects;//设置过滤器的属性限制
+
+            pFilter.WhereClause = "CON_ID=15";
+
+            IFeatureSelection pFeatureSelection = pFeatureLayer as IFeatureSelection;
+            pFeatureSelection.SelectFeatures(pFilter, esriSelectionResultEnum.esriSelectionResultNew, false);
+            pActiveView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
+        }
+
+        //获得shp图层的某一个图元
+        public ESRI.ArcGIS.Geometry.IGeometry GetGeo()
+        {
+            ESRI.ArcGIS.Geometry.IGeometry geo;
+            ILayer Lyr = GetLyr("wayshp");
+            IFeatureLayer pFeatureLayer = Lyr as IFeatureLayer;
+            IFeatureClass pFeatureClass = pFeatureLayer.FeatureClass;
+            IFeature pFeature = pFeatureClass.GetFeature(124);
+            geo = pFeature.Shape;
+            return geo;
+        }
+
+        //清除选择集
+        private void 清空选择ToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            pMap.ClearSelection();
+            this.axMapControl1.Refresh();
         }
 
     }
